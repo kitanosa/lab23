@@ -105,69 +105,35 @@ node *search(node *root, int key)
 
 
 node *tree_min(node *root)
-        {
-                node *l = root;
-        while (l -> left != NULL)
-        l = l -> left;
-        return l;
-        }
-
-
-node *tree_max(node *root)
-        {
-                node *r = root;
-        while (r -> right != NULL)
-        r = r -> right;
-        return r;
-        }
-
-
-node *successor(node *root)
-// root = l
 {
-    /*
-    Допустим надо надо удалить 3. Если у нее есть правое поддерево и его левый потомок, то через successor мы ищем минимального его левого потомка и заменяем вместо удаляемого
-    у нас 3 удалить надо
-    право поддерево 6 ( по if в delete мы рассматриваем этот случай)
-    минимальный левый потомок 4. Его и должна найти эта функций successor
-    а потом в delete записываем 4 вместо 3
-            7
-        3       8
-    1     6
-         5
-        4 
-    */
-    node *p = root, *l = NULL;
-    if (p -> right != NULL)
-        return tree_min(p -> right);
-        // мы вернули l в которой минимальное значение (4)
-        // Оператор return завершает выполнение функции и возвращает управление вызывающей функции. 
-    l = p -> parent;
-    // цикл для правого листа (по идее) (НА САМОМ ДЕЛЕ В ДУШЕ НЕ ЕБУ КАК РАБОТАЕТ ЭТОТ ЦИКЛ. Но пройдемся дальше)
-    while ((l != NULL) && (p == l -> right))
-    {
-        p = l;
-        l = l -> parent;
+    node *l = root;
+    while (l -> left != NULL){
+        l = l -> left;
     }
-    // return l без входа в while если p у нас это левый лист
     return l;
 }
 
 
+node *tree_max(node *root)
+        {
+        node *r = root;
+        while (r -> right != NULL){
+            r = r -> right;
+        }
+        return r;
+        }
+
+
 node *delete(node *root, int key)
 {
-    node *l = NULL, *m = NULL;
-    // l - узел который надо удалить
-    l = search(root, key);
-    // мы нашли l и рассматриваем несколько случаев. Когда есть что либо справа и слева от l либо нет
+    node *l = NULL, *m = NULL;     // l - узел который надо удалить
+    l = search(root, key);     // мы нашли l и рассматриваем несколько случаев. Когда есть что либо справа и слева от l либо нет
     if ((l -> left == NULL) && (l -> right == NULL))
-    {
-        // если l это лист, то мы в m забиваем родителя для l и удаляем дальше указатель на right/left. А после высвобождаем память занимаемую l (то есть сначала удалили ребро а потом ноду)
+    {        // если l это лист, то мы в m забиваем родителя для l и удаляем дальше указатель на right/left. А после высвобождаем память занимаемую l (то есть сначала удалили ребро а потом ноду)
         m = l -> parent;
         if (l == m -> right) m -> right = NULL;
         else m -> left = NULL;
-        // free это синтаксис освобождения памяти. В него передается адрес
-        free(l);
+        free(l);         // free это синтаксис освобождения памяти. В него передается адрес
     }
     if ((l -> left == NULL) && (l -> right != NULL))
     {
@@ -185,20 +151,25 @@ node *delete(node *root, int key)
     }
     if ((l -> left != NULL) && (l -> right != NULL))
     {
-        // найдем минимального левого потомка у правого поддерева для удаляемого числа (в successor это 4. В рисунке)
-        m = successor(l);
-        // вместо 3 записываем 4
-        l -> key = m -> key;
-        // а теперь удаляем саму ноду которая была в 4
-        if (m -> right == NULL)
-            // сначала перейдем в родителя а потом из родителя удалим левого потомка
-            m -> parent -> left = NULL;
-        // в ином случае если есть справа от 4 допустим 4,5 то удаляем 4 и ставим на ее место 4,5
-        else m -> parent -> left = m -> right;
+        m = tree_min(l->right); // ищем минимальную ноду у правого потомка 
+        l -> key = m -> key; // меняем значение в удаляемой ноде l на значение в ноде которую только что нашли m
+        if(l -> right -> left == NULL && l -> right -> right == NULL)// если у правого потомка l два потомка нулевые (это нужно для случая если у l есть только правый и левый потомок. И нужно правого потомка поменять на l) 
+            //Если не рассматривать этот случай, то у нас останется останется указатель в памяти и компилятор будет выдавать бред. Можно уедиться в этом удалив этот цикл и посмотреть на него
+            l -> right = NULL;
+        else// если у нас дерево вида
+            /*
+            7
+              100
+            90     106
+                105
+                нам надо удалить 100. Мы спускаемся к 105. m=105 перейдем от 105 к 106  m -> parent и после удалим указатель от 106 к 105 m -> parent-> left = NULL;
+            */
+             m -> parent-> left = NULL;
         free(m);
     }
     return root;
 }
+
 
 
 void showtree (node *root, int n) {
@@ -209,20 +180,14 @@ void showtree (node *root, int n) {
 }
 
 
-int max(int a,int b){
-    if(a>b)
-        return a;
-    if(a<b)
-        return b;
+
+bool check(node *root) {
+    if (root->left == NULL && root->right == NULL)
+        return true;
+    if (root->left != NULL && root->right != NULL)
+       return check(root->left) && check(root->right);
+    return false;
 }
-int check(node *root)
-{
-
-    if (root == NULL)
-        return 0;
-    return max(check(root->left), check(root->right)) + 1;
-}      
-
 
 
 int main(int argc, char const *argv[])
@@ -261,7 +226,13 @@ int main(int argc, char const *argv[])
             printf("\n   Узел успешно удален\n");
 
         } else if(strcmp(answer, "check") == 0){
-            printf("глубина дерева %d\n", check(root));
+            bool flag = check(root);
+            if (flag)
+            {
+                printf("Данное дерево является B деревом\n");
+            } else{
+                printf("Данное дерево не является B деревом\n");
+            }
         }
 
     }
