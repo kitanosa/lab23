@@ -7,7 +7,6 @@ typedef struct tree{
     struct tree *child;
     struct tree *brother;
 }Node;
-struct tree;
 
 
 Node *new_node(float key)
