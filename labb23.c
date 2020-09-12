@@ -115,21 +115,21 @@ int maxDepth(struct tree* root) // сначала найдем ноду с на�
 
 void node_Unlink(Node *node) // отделяем ноду от дерева
 {
+    Node *tmp = node->father->child;// найдем первого ребенка на уровне
     if (! node)
         return;
-    if (node->parent->child == node;) // меняем указатель с родителя на ребенка
+    if (node->father->child == node) // меняем указатель с родителя на ребенка
     {
-        node->parent->child = node->brother;
+        node->father->child = node->brother;
         node->brother = NULL; // ломаем указатель на следующий элемент после node
     }
-    else if
+    else
     {
-        Node *tmp = node->parent->child;// найдем первого ребенка на уровне
         while(tmp->brother != node) // двигаемся направо пока не найдем ноду что надо удалить
             tmp = tmp->brother;
         tmp->brother = tmp->brother->brother;// как только дошли до того что следующий узел - нода. Меня указатель с ноды что стоит перед node на ноду что стоит после node
     }
-    node->parent = NULL;
+    node->father = NULL;
     node->brother = NULL;
 }
 
@@ -138,9 +138,9 @@ void node_Free(Node *node) // чистим отделенную ноду
     if (! node)
         return;
     if (node->child)
-        nodeFree(node->child);
+        node_Free(node->child);
     if (node->brother)
-        nodeFree(node->brother);
+        node_Free(node->brother);
     free(node);
 }
 
@@ -150,14 +150,13 @@ int main(){
     int action;
 
     struct tree *root = NULL;
-    struct tree *root_1 = NULL;
-    struct tree *root_2;
+    struct tree *root_1;
 
     printf("Дерево общего вида. Доступные действия:\n");
     printf("1. Добавить корень\n");
     printf("2. Добавить узел\n");
     printf("3. Распечатать дерево\n");
-    printf("4. Глубина\n");
+    printf("4. Глубина макс вершины\n");
     printf("5. Удалить узел\n");
     printf("6. Выход\n");
 
@@ -200,8 +199,8 @@ int main(){
 
             case 4:
             {
-                root_2 = find_node(root, max_elem(root));
-                maxDepth(root_2);
+                root_1 = find_node(root, max_elem(root));
+                maxDepth(root_1);
                 break;
             }
 
@@ -211,9 +210,9 @@ int main(){
                 printf("Значение узла который надо удалить: ");
                 scanf("%f", &pos);
 
-                root_2 = find_node(root, pos);
-                node_Unlink(root_2);
-                node_Free(root_2);
+                root_1 = find_node(root, pos);
+                node_Unlink(root_1);
+                node_Free(root_1);
                 printf("Узел успешно удален ");
             }
 
