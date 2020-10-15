@@ -148,7 +148,7 @@ int main(){
     float key, pos;
     int action;
 
-    struct tree *root = NULL;
+    struct tree *root = NULL; // структурного типа потому что root это корень. В качестве адреса передает потому что потом используем -> которая делает разыменовывание по синтаксису
     struct tree *root_1;
 
     printf("Дерево общего вида. Доступные действия:\n");
